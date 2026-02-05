@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>PRO TETRIS</title>
+</head>
+
+<body style="margin:0; background:#000; color:#0f0; font-family:monospace;">
+<body style="margin:0; background:#000; color:#0f0; font-family:monospace;">
+  <div id="home" style="max-width:900px; margin:0 auto; text-align:center; padding:40px 20px;">
+
+    <h2>MEGA TETRIS PROJECT</h2>
+    <hr style="border:0; border-top:1px solid #0f0; margin:30px 0;">
+
+    <pre style="line-height:1.3; margin:0 auto 10px auto;">
+
+* * * * * * * * * * * * * * * * * * * * * *
+*                                         *
+*           M E G A  T E T R I S          *
+*                                         *
+*                 G A M E                 *
+*                                         *
+* * * * * * * * * * * * * * * * * * * * * *
+
+    </pre>
+
+    <div style="margin:25px 0;">
+      ----- J O H N&nbsp;&nbsp;T E T R I S&nbsp;&nbsp;P R E S E N T S -----
+    </div>
+
+    <div style="margin-top:40px; line-height:1.5;">
+      <p>
+        THE FOLLOWING MATERIAL COMES FROM PEOPLE WHO KNOW THE TETRIS
+        PROJECT EXISTS. THEY ARE PEOPLE WHO WORKED IN THE
+        LABS; PEOPLE WHO ASSISTED IN THE
+        CONSTRUCTION OF TETRIS; INTELLIGENCE PERSONAL (KGB, CIA, MOSSAD ECT.)
+      </p>
+
+      <p>
+        THIS INFORMATION IS MEANT FOR THOSE WHO ARE SERIOUSLY
+        INTERESTED IN THE TETRIS RESEARCH. FOR YOUR OWN PROTECTION BE
+        ADVISED TO USE "EXTREME CAUTION" WHILE INVESTIGATING THIS GAME
+      </p>
+    </div>
+
+    <div style="margin-top:30px;">An ongoing investigation:</div>
+
+    <div style="margin-top:10px;">
+      <strong>THE TETRIS</strong><br>
+      by JOHN TETRIS THE III
+    </div>
+<h1>PRO TETRIS</h1>
+
+<div id="levelBox">LEVEL: 1</div>
+
+<div id="kumhavuzu"></div>
+
+<div id="controls">
+<button id="startBtn">Start</button>
+<button id="pauseBtn">Pause</button>
+<button id="restartBtn">Restart</button>
+</div>
+
+<script>
+
+var running=false;
+var paused=false;
+var tick=null;
+
+var kumhavuzu=document.getElementById("kumhavuzu");
+var startBtn=document.getElementById("startBtn");
+var pauseBtn=document.getElementById("pauseBtn");
+var restartBtn=document.getElementById("restartBtn");
+
+var levelBox=document.getElementById("levelBox");
+
+var level = 1;
+
+startBtn.onclick=startGame;
+pauseBtn.onclick=togglePause;
+restartBtn.onclick=restartGame;
+
+function startGame() {
+  running=true;
+  paused=false;
+}
+
+function togglePause() {
+  paused=!paused;
+}
+
+function restartGame() {
+  running=true;
+  paused=false;
+  level=1;
+  levelBox.innerHTML="LEVEL: 1";
+  clearBoard();
+}
+
+
+tick = setInterval(gameLoop, 200);
+
+
+var rows = 20;
+var cols = 10;
+var size = 26;
+
+kumhavuzu.style.width = (cols * size) + "px";
+kumhavuzu.style.height = (rows * size) + "px";
+kumhavuzu.style.position = "relative";
+kumhavuzu.style.border = "1px solid lime";
+
+
+var board = [];
+
+function clearBoard(){
+  for (var r = 0; r < rows; r++) {
+    board[r] = [];
+    for (var c = 0; c < cols; c++) {
+      board[r][c] = 0;
+    }
+  }
+}
+
+clearBoard();
+var shapes = [
+  [
+    [1,1],
+    [1,1]
+  ],
+  [
+    [1,1,1,1]
+  ]
+];
+
+var piece = {
+  x:4,
+  y:0,
+  shape:shapes[0]
+};
+
+function newPiece(){
+  piece.x=4;
+  piece.y=0;
+
+  var index = Math.floor(Math.random()*2);
+  piece.shape = shapes[index];
+}
+
+function drawCell(x, y) {
+  var d = document.createElement("div");
+  d.style.position = "absolute";
+  d.style.width = size + "px";
+  d.style.height = size + "px";
+  d.style.left = (x * size) + "px";
+  d.style.top = (y * size) + "px";
+  d.style.border = "1px solid lime";
+  kumhavuzu.appendChild(d);
+}
+
+function render() {
+  kumhavuzu.innerHTML = "";
+
+  for (var r = 0; r < rows; r++) {
+    for (var c = 0; c < cols; c++) {
+      if (board[r][c]) drawCell(c, r);
+    }
+  }
+
+  for (var pr = 0; pr < piece.shape.length; pr++) {
+    for (var pc = 0; pc < piece.shape[0].length; pc++) {
+      if (piece.shape[pr][pc]) {
+        drawCell(piece.x + pc, piece.y + pr);
+      }
+    }
+  }
+}
+
+function collide(nx, ny) {
+
+  for (var r = 0; r < piece.shape.length; r++) {
+    for (var c = 0; c < piece.shape[0].length; c++) {
+
+      if (!piece.shape[r][c]) continue;
+
+      var x = nx + c;
+      var y = ny + r;
+
+      if (x < 0 || x >= cols || y >= rows) return true;
+      if (board[y] && board[y][x]) return true;
+    }
+  }
+
+  return false;
+}
+
+function lockPiece() {
+
+  for (var r = 0; r < piece.shape.length; r++) {
+    for (var c = 0; c < piece.shape[0].length; c++) {
+
+      if (piece.shape[r][c]) {
+        board[piece.y + r][piece.x + c] = 1;
+      }
+
+    }
+  }
+}
+
+function checkFullBoard(){
+
+  for (var r = 0; r < rows; r++){
+    for (var c = 0; c < cols; c++){
+      if(board[r][c] == 0){
+        return;
+      }
+    }
+  }
+
+  level++;
+  levelBox.innerHTML = "LEVEL: " + level;
+  clearBoard();
+}
+
+function gameLoop() {
+
+  if (!running || paused) return;
+
+  if (!collide(piece.x, piece.y + 1)) {
+    piece.y++;
+  } else {
+    lockPiece();
+    checkFullBoard();
+    newPiece();
+  }
+
+  render();
+}
+
+document.addEventListener("keydown", function (e) {
+
+  if (e.key === "ArrowLeft" && !collide(piece.x - 1, piece.y)) piece.x--;
+  if (e.key === "ArrowRight" && !collide(piece.x + 1, piece.y)) piece.x++;
+  if (e.key === "ArrowDown" && !collide(piece.x, piece.y + 1)) piece.y++;
+
+  render();
+
+});
+
+</script>
+
+</body>
+</html>
